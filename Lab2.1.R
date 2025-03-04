@@ -1,9 +1,9 @@
-data <- read.csv("result.csv", header = TRUE, sep = ",")
+data <- read.csv("result.csv", sep = ",")
 
 str(data)
 
 df <- data[,-1]  
-print(df)
+
 
 #max, min, mean
 stats <- data.frame(
@@ -23,7 +23,7 @@ preference <- data.frame(Выше_7 = high, Ниже_3 = low)
 print(preference)
 
 #сортировка по убыванию
-rating <- sort(colMeans(df[,-1], na.rm = TRUE), decreasing = TRUE)
+rating <- sort(colMeans(df[,-1]), decreasing = TRUE)
 
 print(rating)
 

@@ -27,9 +27,9 @@ print(pow_result)
 
 
 #Задание 2
-# Вектор чередующихся чисел 0, 2, 0, 4, ..., 20
-v1 <- rep(0:10 * 2, each = 2)[-1]  
-v1
+# Вектор чередующихся чисел
+v1 <- rep(0:10 * 2, each = 2)
+print(v1)
 
 
 # Вектор из первых 20 степеней двойки
@@ -102,3 +102,9 @@ print(hundredth_value)
 print(all_but_first_last)
 print(values_between_4_and_10)
 print(values_less_than_4_or_greater_than_10)
+
+
+vec11 <- c("A", "B", "C", "D", "F")
+vec22 <- c(1, 2, 3, 4, 5)
+df <- data.frame(vec11, vec22)
+print(df)
