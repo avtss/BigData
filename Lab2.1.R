@@ -1,4 +1,3 @@
-#Вывод таблички
 data <- read.csv("result.csv", header = TRUE, sep = ",")
 
 str(data)
@@ -8,16 +7,16 @@ print(df)
 
 #max, min, mean
 stats <- data.frame(
-  Max = sapply(df[,-1], max, na.rm = TRUE),
-  Min = sapply(df[,-1], min, na.rm = TRUE),
-  Mean = sapply(df[,-1], mean, na.rm = TRUE)
+  Max = sapply(df[,-1], max),
+  Min = sapply(df[,-1], min),
+  Mean = sapply(df[,-1], mean)
 )
 
 print(stats)
 
 #оценки выше 7 и меньше 3
-high <- colSums(df[,-1] > 7, na.rm = TRUE)  
-low <- colSums(df[,-1] < 3, na.rm = TRUE)  
+high <- colSums(df[,-1] > 7)  
+low <- colSums(df[,-1] < 3)  
 
 preference <- data.frame(Выше_7 = high, Ниже_3 = low)
 

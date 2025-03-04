@@ -3,12 +3,11 @@
 p <- c(7, 6, 5, 4)
 q <- c(0, 1, 2, 3)
 
-# операции с векторами
-sum_result <- p + q        # Сложение
-sub_result <- p - q        # Вычитание
-mul_result <- p * q        # Умножение
-div_result <- p / q        # Деление
-pow_result <- p ^ q        # Возведение в степень
+sum_result <- p + q        
+sub_result <- p - q      
+mul_result <- p * q       
+div_result <- p / q        
+pow_result <- p ^ q        
 
 # Вывод результатов
 print("Сложение p + q:")
@@ -43,11 +42,11 @@ v3 <- 10^(0:4)
 v3
 
 #Задание 3
-# Первая последовательность
+
 seq1 <- 1 / (2:51)
 sum1 <- sum(seq1)
 
-# Вторая последовательность
+
 seq2 <- 1 / (2^(0:20))
 sum2 <- sum(seq2)  
 
@@ -74,10 +73,10 @@ vec3 <- seq(3, 27, by = 3)
 extracted_values <- vec3[c(2, 5, 7)]
 
 # Предпоследнее значение
-penultimate_value <- vec3[length(vec3) - 1]
+last_value <- vec3[length(vec3) - 1]
 
 # Все значения, кроме предпоследнего
-all_but_penultimate <- vec3[-length(vec3)]
+all_but_last <- vec3[-length(vec3)]
 
 # Все элементы, кроме шестого
 all_but_sixth <- vec3[-6]
@@ -95,11 +94,11 @@ values_between_4_and_10 <- vec3[vec3 > 4 & vec3 < 10]
 values_less_than_4_or_greater_than_10 <- vec3[vec3 < 4 | vec3 > 10]
 
 # Вывод результатов
-extracted_values
-penultimate_value
-all_but_penultimate
-all_but_sixth
-hundredth_value
-all_but_first_last
-values_between_4_and_10
-values_less_than_4_or_greater_than_10
+print(extracted_values)
+print(last_value)
+print(all_but_last)
+print(all_but_sixth)
+print(hundredth_value)
+print(all_but_first_last)
+print(values_between_4_and_10)
+print(values_less_than_4_or_greater_than_10)
