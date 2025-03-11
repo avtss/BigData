@@ -37,10 +37,10 @@ ggplot(df_numeric, aes(x = as.factor(`Острые.козырьки`))) +
   labs(title = "Рис.1. Гистограмма всех оценок 'Острые козырьки'", 
        x = "Оценка", y = "Частота")
 
-ggplot(df_numeric, aes(y = `Острые козырьки`)) +
+ggplot(df_numeric, aes(y = `Ведьмак`)) +
   geom_boxplot(fill = "lightblue", color = "black") +
   scale_y_continuous(breaks = seq(1, 10, by = 1), labels = seq(1, 10, by = 1)) +  
-  labs(title = "Рис.2. Боксплот всех оценок 'Острые козырьки'", y = "Оценка")
+  labs(title = "Рис.2. Боксплот всех оценок 'Ведьмак'", y = "Оценка")
 
 # 5. Операции с таблицами
 # Слияние таблиц (пример с самим собой)
