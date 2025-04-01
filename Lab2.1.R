@@ -42,7 +42,13 @@ print(rating)
 categories <- names(rating) 
 scores <- as.numeric(rating)  
 
-barplot(scores, names.arg = categories, las = 2, col = "lightblue",
-        main = "Рейтинг предпочтений", xlab = "", ylab = "Средний балл", cex.names = 0.5)
-
-
+barplot(scores,
+        names.arg = categories,
+        horiz = TRUE,
+        las = 1,
+        col = "lightblue",
+        main = "Рейтинг предпочтений",
+        xlab = "Средний балл",
+        ylab = "",
+        cex.names = 0.8,
+        xlim = c(0, max(scores) * 1.1))
