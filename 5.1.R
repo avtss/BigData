@@ -1,15 +1,28 @@
+library(factoextra)    # Для визуализации кластеров
+library(NbClust)       # Для определения числа кластеров
+library(cluster)       # Алгоритмы кластеризации
+library(scatterplot3d) # 3D визуализация
+library(e1071)         # Наивный Байес
+library(party)         # Деревья решений
+library(randomForest)  # Случайный лес
+library(dplyr)  
+
 # 1. Загрузка данных 
-data <- read.csv("/Users/aveti/BigData/BRFSS_Physical_Activity.csv")
-location_key <- read.csv("C:/Users/aveti/BigData/BRFSS_location_id_KEY.csv")
-columns_key <- read.csv("C:/Users/aveti/BigData/BRFSS_Physical_Activity_columns_KEY.csv")
+data <- read.csv("BRFSS_Physical_Acticity.csv", header = TRUE, sep = ",")
+location_key <- read.csv("BRFSS_location_id_KEY.csv", header = TRUE, sep = ",")
+columns_key <- read.csv("BRFSS_Physical_Activity_columns_KEY.csv", header = TRUE, sep = ",")
 
 # Объединяем с ключом локаций
 data <- merge(data, location_key, by.x = "location_id", by.y = "id")
 
-# 2. Выбираем только числовые переменные с "_value" (аналог вашего numeric_data)
+# 2. Выбираем только числовые переменные с "_value" и удаляем строки с NA
 numeric_data <- data[, grep("_value", names(data), value = TRUE)]
+numeric_data <- na.omit(numeric_data)  # Удаляем строки с пропущенными значениями
 
-# 3. Boxplot (точный аналог вашего boxplot)
+# Проверяем на Inf и NaN
+numeric_data <- numeric_data[!is.infinite(rowSums(numeric_data)) & !is.nan(rowSums(numeric_data)), ]
+
+# 3. Boxplot
 boxplot(numeric_data,
         names = c("PAINDX2_yes", "PAINDX2_no", "PASTAE2_yes", "PASTAE2_no",
                   "PASTRNG_yes", "PASTRNG_no", "TOTINDA_yes", "TOTINDA_no"),
@@ -17,9 +30,10 @@ boxplot(numeric_data,
         col = "lightgray",
         las = 2)
 
-# 4. Нормализация (точная копия вашего кода)
+# 4. Нормализация
 normalized <- scale(numeric_data)
 
+normalized <- scale(numeric_data, center = TRUE, scale = TRUE)
 boxplot(normalized, 
         main = "Boxplot (нормализованные данные)", 
         col = "lightgray",
@@ -27,7 +41,7 @@ boxplot(normalized,
                   "PASTRNG_yes", "PASTRNG_no", "TOTINDA_yes", "TOTINDA_no"),
         las = 2)
 
-# 5. Дескриптивный анализ (точная копия)
+# 5. Дескриптивный анализ
 desc <- data.frame(
   Mean = sapply(numeric_data, mean, na.rm = TRUE),
   Median = sapply(numeric_data, median, na.rm = TRUE),
@@ -39,7 +53,7 @@ desc <- data.frame(
 )
 round(desc, 2)
 
-# 6. Определение числа кластеров (точные копии ваших графиков)
+# 6. Определение числа кластеров
 fviz_nbclust(normalized, kmeans, method = "wss") +
   labs(subtitle = "Метод локтя")
 
@@ -49,25 +63,25 @@ fviz_nbclust(normalized, kmeans, method = "silhouette") +
 gap_stat <- cluster::clusGap(normalized, FUN = kmeans, nstart = 25, K.max = 10, B = 50)
 fviz_gap_stat(gap_stat)
 
-nb <- NbClust(data = normalized, distance = "euclidean", min.nc = 2, max.nc = 10, method = "kmeans", index = "all")
-fviz_nbclust(nb) + labs(subtitle = "Консенсус-анализ")
+nb <- NbClust(
+  data = normalized,
+  distance = "euclidean",
+  min.nc = 2,
+  max.nc = 10,
+  method = "kmeans",
+  index = c("silhouette") 
+)
+fviz_nbclust(nb)
 
-# 7. Иерархическая кластеризация (точная копия)
+# 7. Иерархическая кластеризация
 dist_mat <- dist(normalized)
 hc <- hclust(dist_mat, method="ward.D2")
-plot(hc, main="Дендрограмма")
+plot(hc, main="Дендрограмма", labels=FALSE)
 rect.hclust(hc, k=3, border="red")
 groups_h <- cutree(hc, k=3)
-data$cluster_h <- groups_h
 
-plot(hc,
-     horiz = TRUE,
-     labels = FALSE,
-     xlim = c(0, 40))
-rect.hclust(hc, k = 3, border = "red", horiz = TRUE)
-
-# 8. Анализ кластеров (точная копия)
-means_h <- aggregate(numeric_data, by = list(cluster = data$cluster_h), FUN = mean)
+# 8. Анализ кластеров
+means_h <- aggregate(numeric_data, by = list(cluster = groups_h), FUN = mean)
 
 m2 <- t(as.matrix(means_h[, -1]))
 colnames(m2) <- c("g1","g2","g3")
@@ -84,16 +98,9 @@ barplot(
   main = "Средние значения по кластерам"
 )
 
-par(mfrow = c(2,4), mar = c(4,4,2,1))
-for(col in colnames(numeric_data)) {
-  boxplot(numeric_data[[col]] ~ cluster_h, data = data, main = col)
-}
-par(mfrow = c(1,1))
-
-# 9. K-means кластеризация (точная копия)
+# 9. K-means кластеризация
 set.seed(123)
 km.res <- kmeans(normalized, centers = 3, nstart = 25)
-data$cluster_km <- km.res$cluster
 
 fviz_cluster(km.res,
              data = normalized,
@@ -101,17 +108,15 @@ fviz_cluster(km.res,
              ellipse.type = "norm",
              main = "k_means k=3")
 
-# 10. Scatterplot (точная копия)
-cols <- c("tomato","skyblue","seagreen")[data$cluster_h]
+# 10. Scatterplot
+cols <- c("tomato","skyblue","seagreen")[km.res$cluster]
 pairs(numeric_data,
       pch = 19,
       col = cols,
       main = "Scatterplot матрица")
 
-# 11. 3D визуализация (точная копия)
-library(scatterplot3d)
-
-cols3d <- c("tomato","skyblue","seagreen")[data$cluster_h]
+# 11. 3D визуализация
+cols3d <- c("tomato","skyblue","seagreen")[km.res$cluster]
 
 s3d <- scatterplot3d(
   x = numeric_data[,1],
@@ -131,28 +136,29 @@ legend("topright",
        pch = 16,
        inset = 0.05)
 
-# 12. Классификация (точная копия)
-data$cluster_km <- as.factor(data$cluster_km)
+# 12. Классификация
+# Создаем новый датафрейм с кластерами
+cluster_data <- cbind(numeric_data, cluster = as.factor(km.res$cluster))
 
 set.seed(1234)
-ind <- sample(2, nrow(data), replace = TRUE, prob = c(0.7, 0.3))
-trainData <- data[ind == 1, ]
-testData <- data[ind == 2, ]
+ind <- sample(2, nrow(cluster_data), replace = TRUE, prob = c(0.7, 0.3))
+trainData <- cluster_data[ind == 1, ]
+testData <- cluster_data[ind == 2, ]
 
 # Наивный Байес
-model_nb <- naiveBayes(cluster_km ~ ., data = trainData[, c(colnames(numeric_data), "cluster_km")])
+model_nb <- naiveBayes(cluster ~ ., data = trainData)
 pred_nb <- predict(model_nb, testData)
-mean(pred_nb == testData$cluster_km)
+mean(pred_nb == testData$cluster)
 
 # Дерево решений
-model_tree <- ctree(cluster_km ~ ., data = trainData[, c(colnames(numeric_data), "cluster_km")])
+model_tree <- ctree(cluster ~ ., data = trainData)
 plot(model_tree)
 pred_tree <- predict(model_tree, testData)
-mean(pred_tree == testData$cluster_km)
+mean(pred_tree == testData$cluster)
 
 # Случайный лес
-model_rf <- randomForest(cluster_km ~ ., 
-                         data = trainData[, c(colnames(numeric_data), "cluster_km")],
+model_rf <- randomForest(cluster ~ ., 
+                         data = trainData,
                          ntree = 100)
 pred_rf <- predict(model_rf, testData)
-mean(pred_rf == testData$cluster_km)
+mean(pred_rf == testData$cluster)
