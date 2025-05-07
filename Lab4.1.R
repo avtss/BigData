@@ -2,39 +2,39 @@ library(rvest)
 library(dplyr)
 
 years <- 2014:2021
-countries <- c("France", "Cuba", "Argentina", "Bulgaria", "Hungary")
+countries <- c("France", "Germany", "Argentina", "Bulgaria", "Hungary")
 base_url <- "https://www.numbeo.com/quality-of-life/rankings_by_country.jsp?title="
 
-# Функция для сбора данных по году и стране
+# сбор данных по стране и году
 get_quality_of_life <- function(year, country) {
   url <- paste0(base_url, year)
   page <- read_html(url)
   
-  # Чтение таблицы целиком
+  # чтение таблицы
   table <- page %>% html_node("table#t2") %>% html_table()
   
-  # Ручная нумерация Rank
+  # нумерация мест
   table <- table %>%
     mutate(Rank = row_number())
   
-  # Добавляем год
+  # добавляем год
   table <- table %>% mutate(Year = year)
   
-  # Фильтруем нужную страну
+  # фильтруем нужную страну
   result <- table %>% filter(Country == country)
   
   return(result)
 }
 
-# Улучшенная функция преобразования с обработкой NA
+# обработка NA на всякий случай
 safe_convert <- function(x) {
-  # Сначала удаляем запятые, затем преобразуем в числовой формат
+  # удаление запятых и в число преобразуем
   suppressWarnings({
     as.numeric(gsub(",", "", x))
   })
 }
 
-# Функция для сбора данных по всем годам для одной страны
+#сбор данных по всем годам одной страны
 get_country_data <- function(country, years = 2014:2021) {
   all_data <- lapply(years, function(x) get_quality_of_life(x, country))
   
@@ -46,23 +46,23 @@ get_country_data <- function(country, years = 2014:2021) {
   return(all_data_df)
 }
 
-# Собираем данные для всех стран
+# данные для всех стран
 data_france <- get_country_data("France")
-data_cuba <- get_country_data("Cuba")
+data_germany <- get_country_data("Germany")
 data_argentina <- get_country_data("Argentina")
 data_bulgaria <- get_country_data("Bulgaria")
 data_hungary <- get_country_data("Hungary")
 
-# Объединяем все данные
+# обьединяем
 all_data_df <- bind_rows(
   data_france,
-  data_cuba,
+  data_germany,
   data_argentina, 
   data_bulgaria,
   data_hungary
 )
 
-# Показатели для анализа
+# названия столбцов для анализа
 stats <- c(
   "Rank",
   "Quality of Life Index",
@@ -76,29 +76,27 @@ stats <- c(
   "Climate Index"
 )
 
-# Цвета для каждой страны
+# цвета
 colors <- c("France" = "blue", 
-            "Cuba" = "red", 
+            "Germany" = "black", 
             "Argentina" = "green", 
             "Bulgaria" = "orange", 
             "Hungary" = "purple")
 
-# Строим графики для каждого показателя
+# графики по каждому показателю
 for(stat in stats) {
   if(stat %in% colnames(all_data_df)) {
-    # Определяем нужно ли переворачивать ось Y
+    # переворачиваем ось Y там где чем ниже тем лучше
     ylim <- range(all_data_df[[stat]], na.rm = TRUE)
     if(stat %in% c("Rank", "Pollution Index", "Property Price to Income Ratio", 
                    "Cost of Living Index", "Traffic Commute Time Index")) {
       ylim <- rev(ylim)
     }
     
-    # Создаем пустой график
     plot(NA, xlim = range(years), ylim = ylim,
          main = paste("Сравнение по показателю:", stat),
          xlab = "Год", ylab = stat)
     
-    # Добавляем линии для каждой страны
     for(country in countries) {
       country_data <- all_data_df %>% filter(Country == country)
       lines(country_data$Year, country_data[[stat]], 
@@ -111,5 +109,5 @@ for(stat in stats) {
   }
 }
 
-# Выводим таблицу с данными
+# выводим таблицу
 View(all_data_df)
