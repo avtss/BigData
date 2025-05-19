@@ -23,13 +23,27 @@ numeric_data <- na.omit(numeric_data)  # Удаляем строки с проп
 numeric_data <- numeric_data[!is.infinite(rowSums(numeric_data)) & !is.nan(rowSums(numeric_data)), ]
 
 # 3. Boxplot
+par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.1) 
 boxplot(numeric_data,
         names = c("PAINDX2_yes", "PAINDX2_no", "PASTAE2_yes", "PASTAE2_no",
                   "PASTRNG_yes", "PASTRNG_no", "TOTINDA_yes", "TOTINDA_no"),
         main = "Boxplot по показателям физической активности",
         col = "lightgray",
-        las = 2)
+        las = 2,
+        cex.axis = 0.8)
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(mfrow = c(2, 4), mar = c(4, 4, 2, 1)) # Настраиваем отступы
+for (col in names(numeric_data)) {
+  hist(numeric_data[[col]], 
+       main = paste("Распределение", col),
+       xlab = "",
+       col = "lightblue",
+       freq = FALSE,
+       breaks = 20)
+}
 
+
+par(mfrow = c(1, 1))
 # 4. Нормализация
 normalized <- scale(numeric_data)
 
